@@ -1,13 +1,15 @@
 import logo from "./logo.svg";
 import "./App.css";
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getFirestore, collection, getDocs } from "firebase/firestore/lite";
+import { getDatabase, onValue, ref } from "firebase/database";
+import { useEffect } from "react";
 
 function App() {
   const firebaseConfig = {
     apiKey: "AIzaSyDYBGg_5A4Mh29Mb-46w7YHkneXwCJtMuA",
     authDomain: "pjwc22.firebaseapp.com",
+    databaseURL:
+      "https://pjwc22-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "pjwc22",
     storageBucket: "pjwc22.appspot.com",
     messagingSenderId: "686750154057",
@@ -15,35 +17,24 @@ function App() {
     measurementId: "G-CXD86LP72E",
   };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const db = getFirestore(app);
+  const rtdb = getDatabase(initializeApp(firebaseConfig));
 
-  // Get a list of cities from your database
-  async function getCities() {
-    const citiesCol = collection(db, "cities");
-    const citySnapshot = await getDocs(citiesCol);
-    const cityList = citySnapshot.docs.map((doc) => doc.data());
-    return cityList;
+  async function getRTCities() {
+    const starCountRef = ref(rtdb, "cities");
+    onValue(starCountRef, (snapshot) => {
+      const data = snapshot.val();
+      console.log("LOGGGGG", JSON.stringify(data));
+    });
   }
+
+  useEffect(() => {
+    getRTCities();
+  }, []);
 
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-        <div>{JSON.stringify(getCities())}</div>
       </header>
     </div>
   );
